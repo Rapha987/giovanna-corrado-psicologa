@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Giovanna Corrado">
+  <rect width="32" height="32" rx="7" fill="#243028"/>
+  <g transform="rotate(-28 16 16)">
+    <ellipse cx="16" cy="16.2" rx="6.4" ry="11.6" fill="#5C7262"/>
+    <path d="M16 6.2v17.6" fill="none" stroke="#F4EFE6" stroke-width="1.5" stroke-linecap="round"/>
+  </g>
+</svg>
