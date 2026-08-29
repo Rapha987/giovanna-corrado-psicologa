@@ -1,6 +1,7 @@
 const SLOT_TIMES = ["09:00", "10:00", "11:30", "14:30", "15:30", "16:30", "17:30"];
 const WEEKS = 8;
 const KEY = "gc-bookings";
+const WA_E164 = "393274596515";
 const KINDS = [
   { id: "consultazione", label: "Primo colloquio", hint: "Gratuito · 50 minuti" },
   { id: "supporto", label: "Supporto psicologico", hint: "Percorso individuale" },
@@ -44,6 +45,24 @@ function readMine() {
   try { return JSON.parse(localStorage.getItem(KEY) || "[]"); } catch { return []; }
 }
 function writeMine(list) { localStorage.setItem(KEY, JSON.stringify(list)); }
+function kindLabel(id) { return KINDS.find((k) => k.id === id)?.label ?? id; }
+function modLabel(id) { return MODS.find((m) => m.id === id)?.label ?? id; }
+function waMessage(b) {
+  return [
+    `Ciao, sono ${b.guestName}.`,
+    "Vorrei confermare una prenotazione:",
+    "",
+    `• ${formatLong(b.slotDate)} alle ${b.slotTime}`,
+    `• ${kindLabel(b.kind)}`,
+    `• ${modLabel(b.modality)}`,
+    `• Codice ${b.code}`,
+    "",
+    "Grazie.",
+  ].join("\n");
+}
+function waUrl(b) {
+  return `https://wa.me/${WA_E164}?text=${encodeURIComponent(waMessage(b))}`;
+}
 
 const state = {
   cursor: today(),
@@ -125,10 +144,16 @@ function renderMine() {
   list.innerHTML = "";
   mine.forEach((b) => {
     const li = document.createElement("li");
-    const kind = KINDS.find((k) => k.id === b.kind)?.label ?? b.kind;
-    const mod = MODS.find((m) => m.id === b.modality)?.label ?? b.modality;
     li.innerHTML = `<div><p style="font-weight:500;color:var(--ink);text-transform:capitalize">${formatLong(b.slotDate)} · ${b.slotTime}</p>
-      <p style="font-size:.9rem">${kind} · ${mod} · codice <span style="font-variant-numeric:tabular-nums">${b.code}</span></p></div>`;
+      <p style="font-size:.9rem">${kindLabel(b.kind)} · ${modLabel(b.modality)} · codice <span style="font-variant-numeric:tabular-nums">${b.code}</span></p></div>`;
+    const actions = document.createElement("div");
+    actions.style.cssText = "display:flex;flex-wrap:wrap;gap:.5rem";
+    const wa = document.createElement("a");
+    wa.className = "btn btn-outline btn-sm";
+    wa.href = waUrl(b);
+    wa.target = "_blank";
+    wa.rel = "noreferrer";
+    wa.textContent = "WhatsApp";
     const cancel = document.createElement("button");
     cancel.className = "btn btn-outline btn-sm";
     cancel.textContent = "Annulla";
@@ -136,7 +161,9 @@ function renderMine() {
       writeMine(readMine().filter((x) => x.code !== b.code));
       renderMine(); renderSlots();
     });
-    li.appendChild(cancel);
+    actions.appendChild(wa);
+    actions.appendChild(cancel);
+    li.appendChild(actions);
     list.appendChild(li);
   });
 }
@@ -196,6 +223,8 @@ function submitBook(e) {
   document.getElementById("ok-code").textContent = saved.code;
   document.getElementById("ok-copy").textContent =
     `${saved.guestName}, ${formatLong(saved.slotDate)} alle ${saved.slotTime}`;
+  const wa = document.getElementById("ok-wa");
+  wa.href = waUrl(saved);
   document.getElementById("form-view").hidden = true;
   document.getElementById("ok-view").hidden = false;
   renderMine();

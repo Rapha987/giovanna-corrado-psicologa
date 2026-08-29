@@ -222,6 +222,7 @@ dialog::backdrop { background: rgb(28 36 30 / 0.5); }
   .band-imgs img { height: 24rem; }
 }
 @media (min-width: 1024px) {
+  .contact-grid { grid-template-columns: 1fr 1fr 1fr; }
   .nav { display: flex; }
   .menu-btn { display: none; }
   .hero { grid-template-columns: 1.05fr 0.95fr; gap: 4rem; padding-top: 7rem; }
